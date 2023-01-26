@@ -10,4 +10,22 @@ In this blog post, I will show you how to create a database of simple addresses,
 
 ## Architecture
 
-![Architecture diagram](https://user-images.githubusercontent.com/1051195/214499954-075cd1cb-c427-4c9c-90a1-5a12120b2f42.png)
+In the following architecture we have two separate actors securely connecting to Azure via a web application hosted in Azure App Services and an Azure Function, triggered on demand. 
+
+The Azure Function named _Enrich local data_ is responsible for searching for addresses without geolocation(latitude, longitude) in the Azure SQL Server database. For each addreess, a call is made to Azure Maps' Search API, passing the address information as a parameter and retrieving the geolocation to be stored in the database.
+
+There is also a user accessing a web applicaiton that collects the locations from Azure SQL Server using the Azure Function _Get locations_ and generates a visualization layer with the Azure Maps SDK to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
+
+![Architecture diagram](https://user-images.githubusercontent.com/1051195/214759203-1ea95346-68b1-418b-a82d-454cf5084437.png)
+
+## Walkthrough
+
+### Pre-requisites
+
+To build this solution you will need:
+
+1. An Azure Subscription
+2. An Azure Maps subscription
+3. Visual Studio Code and Git installed on your local machine
+
+
