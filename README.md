@@ -28,7 +28,7 @@ To build this solution you will need:
 2. An Azure Maps subscription
 3. Visual Studio Code and Git installed on your local machine
 
-## Creating a resource group
+### Creating a resource group
 
 As a best practice and to facilitate tearing down the environment, follow [these instructions](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#create-resource-groups) to create a Resource Group in your Azure Subscription.
 
@@ -97,9 +97,10 @@ values ('858', 'Beatty Street', '6th Floor', 'Vancouver', 'BC', 'V6B 1C1', 'CA')
 insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
 values ('375', 'Water Street', 'Suite 710', 'Vancouver', 'BC', 'V6B 5C6', 'CA');
 
- GO
+GO
 
-select * from Locations
+select * from Locations;
+
 ```
 The script above creates a table called _Locations_ and populates it with address parameters. After that, we populate the database with addresses representing Microsoft offices in Canada. Note that we are keeping the _latitude_ and _longitude_ parameters empty, on purpose.
 
