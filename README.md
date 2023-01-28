@@ -119,7 +119,7 @@ First, install [Azure Functions Core Tools](https://docs.microsoft.com/azure/azu
 
 Then, create a function app for .NET by following [this guide](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-csharp?tabs=in-process) to create your functions on Visual Studio code and publish them to your Azure Subscription. Create one called _EnrichDatabase_ and another called _GetLocations_. 
 
-You can also skip the above step and clone this repository, which contains the code for both functions and the Azure Maps handler.
+Now, clone [this repository](TODO: add link to repository) containing the source code for both functions and the Azure Maps handler.
 
 #### Enable SQL bindings
 
@@ -157,77 +157,45 @@ Open the generated `local.settings.json` file and in the `Values` section verify
 
 Follow [this guide](https://github.com/Azure/azure-functions-sql-extension/blob/main/docs/SetupGuide_Dotnet.md) for a deeper lesson on SQL bindings.
 
-#### Explaining the code
+#### Azure Maps configuration
+
+To enable our project to use the Azure Maps APIs, install the client library for .NET with NuGet:
+
+```powershell
+dotnet add package Azure.Maps.Search --prerelease
+```
+
+We also need the _Azure Maps primary key_ which can get from within the Azure Portal. Navigate to your Azure Maps resource and copy the _Primary key_ content from the **Authentication** tab.
+
+Open your _local.settings.json_ file and add the following line at the end:
+
+```powershell
+"AzureMapsKey": "{Your key copied in the previous step}"
+```
+
+### Explaining the code
 
 Inside the _dotnet_ folder, you'll find the all the backend code that we will use to fetch the database locations and enrich the addresses. Let's breakdown file by file.
 
-1. _Locations.cs_
+1. Locations.cs
 
-```csharp
-public class Location
-{
-    public int id { get; set; }
-    public string street_number { get; set; }
-    public string street_name { get; set; }
-    public string details { get; set; }
-    public string city { get; set; }
-    public string province { get; set; }
-    public string postal_code { get; set; }
-    public string country_code { get; set; }
-    public double? latitude { get; set; }
-    public double? longitude { get; set; }
-}
-```
+This model represents the Location table in our database. Note that the _latitude_ and _longitude_ values are nullable, because when we query for the addresses for the first time, they won't exist.
 
-2. GetLocations
-```csharp
-public static class GetLocations
-{
-    [FunctionName("GetLocations")]
-    public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "locations")] HttpRequest req,
-        ILogger log,
-        [Sql("select * from Locations",
-        CommandType = System.Data.CommandType.Text,
-        ConnectionStringSetting = "SqlConnectionString")]
-        IEnumerable<Location> location)
-    {
-        return new OkObjectResult(location);
-    }
-}
-```
-3. EnrichDatabase
+2. GetLocations.cs
 
-```csharp
-public static class EnrichDatabase
-{
-    [FunctionName("EnrichDatabase")]
-    public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "enrich")] HttpRequest req,
-         [Sql("select * from Locations where latitude is null and longitude is null", 
-             CommandType = System.Data.CommandType.Text,
-             ConnectionStringSetting = "SqlConnectionString")]
-             IEnumerable<Location> locations,
-         [Sql("dbo.Locations", ConnectionStringSetting = "SqlConnectionString")]
-             IAsyncCollector<Location> locationsI)
-    {
-        List<Location> result = new List<Location>();
+This is the function that will be used in our front-end web application to search for the address geolocation and populate the map.
 
-        foreach (Location l in locations)
-        {
-            AzureMapsHandler mapsHandler = AzureMapsHandler.GetInstance;
-            Location location = await mapsHandler.SearchForAddress(l);
-            result.Add(location);
+3. EnrichDatabase.cs
 
-            await locationsI.AddAsync(location);
-        }
+This function searches for addresses without geolocations, calls the SearchForAddress API from Azure Maps to colelct the latitude and longitude for all locations and store them in the database.
 
-        return new CreatedResult($"/api/enrich", "204");
-    }
-}
-```
+#### Azure Maps
 
-4. AzureMapsHandler
+At this point, let's talk about how we are leveraging [Azure Maps](https://azuremaps.com/) to achieve the database enrichment process.
+
+Azure Maps provides multiple APIs for you to geocode(generate a geolocation from an address) and reverse-geocode(generate an address from a geolocation) addresses. In this particular example, we will use the API **_SearchStructuredAddressAsync_** for our task. This API is perfect for our use case, as we have a broken down address structured that we can pass as a parameter to retrieve the geolocation as a response.
+
+Let's look at the _AzureMapsHandler.cs_ file
 
 ```csharp
  public class AzureMapsHandler
@@ -267,3 +235,38 @@ public static class EnrichDatabase
         return location;
     }
 }
+
+When we instantiate the class, we create a credential using the Azure Maps key that we have stored as an environment variable. After that, we use this credential to create our _MapsSearchClient_. 
+
+```csharp
+AzureKeyCredential credential = new AzureKeyCredential(azureMapsKey);
+this.searchClient = new MapsSearchClient(credential);
+```
+You can also use managed identities for a more secure solution to generate your credentials. Follow [this guide](https://techcommunity.microsoft.com/t5/azure-maps-blog/managed-identities-for-azure-maps/ba-p/3666312) if you choose this approach. 
+ 
+Now, we create a StructuredAddress object from the location passed as a parameter. 
+ 
+ ```csharp
+var address = new StructuredAddress
+{
+    CountryCode = location.country_code,
+    StreetNumber = location.street_number,
+    StreetName = location.street_name,
+    Municipality = location.city,
+    CountrySubdivision = location.province,
+    PostalCode = location.postal_code
+};
+```
+
+Finally, we call the _SearchStructureAddressAsync_ API passing the structured address as a parameter and update the location with the latitude and longitude from the resppnse.
+
+```chsarp
+Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
+SearchAddressResultItem resultItem = searchResult.Value.Results[0];
+location.latitude = resultItem.Position.Latitude;
+location.longitude = resultItem.Position.Longitude;
+```
+
+
+
+
