@@ -260,7 +260,7 @@ var address = new StructuredAddress
 
 Finally, we call the _SearchStructureAddressAsync_ API passing the structured address as a parameter and update the location with the latitude and longitude from the resppnse.
 
-```chsarp
+```csharp
 Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
 SearchAddressResultItem resultItem = searchResult.Value.Results[0];
 location.latitude = resultItem.Position.Latitude;
