@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AzureMaps
 {
-    public static class GetLocationsGeolocationEmpty
+    public static class EnrichDatabase
     {
-        [FunctionName("GetGeolocationNull")]
+        [FunctionName("EnrichDatabase")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "geolocation-null")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "enrich")] HttpRequest req,
             [Sql("select * from Locations where latitude is null and longitude is null", CommandType = System.Data.CommandType.Text,
                 ConnectionStringSetting = "SqlConnectionString")]
                 IEnumerable<Location> locations,
@@ -30,7 +30,7 @@ namespace Microsoft.AzureMaps
                 await locationsI.AddAsync(location);
             }
 
-            return new CreatedResult($"/api/geolocation-null", "204");
+            return new CreatedResult($"/api/enrich", "204");
             //return (ActionResult)new OkObjectResult(locationsI);
         }
     }
