@@ -361,7 +361,7 @@ location.latitude = resultItem.Position.Latitude;
 location.longitude = resultItem.Position.Longitude;
 ```
 
-If you want to see more **Search** samples, follow [this resource](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/maps/Azure.Maps.Search/samples/SearchAddressSamples.md). To learn more about the Azure Maps C# SDK, read [this](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-dev-guide-csharp-sdk).
+If you want to see more **Search** samples, follow [this resource](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/maps/Azure.Maps.Search/samples/SearchAddressSamples.md). To learn more about the **Azure Maps C# SDK**, read [this](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-dev-guide-csharp-sdk).
 
 #### Geocode storage considerations
 TODO
