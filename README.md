@@ -119,49 +119,249 @@ First, install [Azure Functions Core Tools](https://docs.microsoft.com/azure/azu
 
 Then, create a function app for .NET by following [this guide](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-csharp?tabs=in-process) to create your functions on Visual Studio code and publish them to your Azure Subscription. Create one called _EnrichDatabase_ and another called _GetLocations_. 
 
-After that, enable SQL bindings on the function app. More information can be found in the [Azure SQL bindings for Azure Functions docs](https://aka.ms/sqlbindings).
+Now, clone [this repository](TODO: add link to repository) containing the source code for both functions and the Azure Maps handler.
 
-    Install the extension:
+#### Enable SQL bindings
 
-    ```powershell
-    dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
-    ```
+Now, let's enable SQL bindings on the function app. First, install the extension:
+
+```powershell
+dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
+```
+
+After that, get the SQL connection string from your database.
+
+<details>
+  <summary>Local SQL Server</summary>
+  - Use this connection string, replacing the placeholder values for the database and password.</br>
+   </br>
+   <code>Server=localhost;Initial Catalog={db_name};Persist Security Info=False;User ID=sa;Password={your_password};</code>
+  </details>
+
+  <details>
+  <summary>Azure SQL Server</summary>
+  - Browse to the SQL Database resource in the <a href="https://ms.portal.azure.com/">Azure portal</a></br>
+  - In the left blade click on the <b>Connection Strings</b> tab</br>
+  - Copy the <b>SQL Authentication</b> connection string</br>
+   </br>
+   (<i>Note: when pasting in the connection string, you will need to replace part of the connection string where it says '{your_password}' with your Azure SQL Server password</i>)
+</details>
     
+Open the generated `local.settings.json` file and in the `Values` section verify you have the below. If not, add the below and replace `{connection_string}` with the your connection string from the previous step:
+
+```json
+"AzureWebJobsStorage": "UseDevelopmentStorage=true",
+"AzureWebJobsDashboard": "UseDevelopmentStorage=true",
+"SqlConnectionString": "{connection_string}"
+```
+
 Follow [this guide](https://github.com/Azure/azure-functions-sql-extension/blob/main/docs/SetupGuide_Dotnet.md) for a deeper lesson on SQL bindings.
 
-#### Configure Function App
+#### Azure Maps configuration
 
-Once you have your Function App you need to configure it for use with Azure SQL bindings for Azure Functions.
+To enable our project to use the Azure Maps APIs, install the client library for .NET with NuGet:
 
-1. Ensure you have Azure Storage Emulator running. This is specific to the sample functions in this repository with a non-HTTP trigger. For information on the Azure Storage Emulator, refer to the docs on its use in [functions local development](https://docs.microsoft.com/azure/azure-functions/functions-app-settings#azurewebjobsstorage) and [installation](https://docs.microsoft.com/azure/storage/common/storage-use-emulator#get-the-storage-emulator).
+```powershell
+dotnet add package Azure.Maps.Search --prerelease
+```
 
-2. Get your SQL connection string
+We also need the _Azure Maps primary key_ which can get from within the Azure Portal. Navigate to your Azure Maps resource and copy the _Primary key_ content from the **Authentication** tab.
 
-   <details>
-   <summary>Local SQL Server</summary>
-   - Use this connection string, replacing the placeholder values for the database and password.</br>
-    </br>
-    <code>Server=localhost;Initial Catalog={db_name};Persist Security Info=False;User ID=sa;Password={your_password};</code>
-   </details>
+Open your _local.settings.json_ file and add the following line at the end:
 
-   <details>
-   <summary>Azure SQL Server</summary>
-   - Browse to the SQL Database resource in the <a href="https://ms.portal.azure.com/">Azure portal</a></br>
-   - In the left blade click on the <b>Connection Strings</b> tab</br>
-   - Copy the <b>SQL Authentication</b> connection string</br>
-    </br>
-    (<i>Note: when pasting in the connection string, you will need to replace part of the connection string where it says '{your_password}' with your Azure SQL Server password</i>)
-   </details>
+```powershell
+"AzureMapsKey": "{Your key copied in the previous step}"
+```
 
-3. Open the generated `local.settings.json` file and in the `Values` section verify you have the below. If not, add the below and replace `{connection_string}` with the your connection string from the previous step:
+#### Running the solution
 
-    ```json
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
-    "SqlConnectionString": "{connection_string}"
-    ```
+Press F5 to start debugging the backend application.
 
+First, run the _GetLocations_ function. You should see a list of addresses with no latitude and longitude:
 
-#### GetGeolocationsNull
+```json
+[
+  {
+    "id": 1,
+    "street_number": "81",
+    "street_name": "Bay St",
+    "details": "Suite 4400",
+    "city": "Toronto",
+    "province": "ON",
+    "postal_code": "M5J 0E7",
+    "country_code": "CA",
+    "latitude": null,
+    "longitude": null
+  },
+  {
+    "id": 2,
+    "street_number": "6795",
+    "street_name": "Marconi Street",
+    "details": "Suite 401",
+    "city": "Montreal",
+    "province": "QC",
+    "postal_code": "H2S 3J9",
+    "country_code": "CA",
+    "latitude": null,
+    "longitude": null
+  }
+  ...
+  {
+    "id": 11,
+    "street_number": "375",
+    "street_name": "Water Street",
+    "details": "Suite 710",
+    "city": "Vancouver",
+    "province": "BC",
+    "postal_code": "V6B 5C6",
+    "country_code": "CA",
+    "latitude": null,
+    "longitude": null
+  }
+]
+```
 
+Now, run the _EnrichDatabase_ function. If no problems appear in the console, you should see the a **204** response code. 
 
+Finally, run _GetLocations_ for a second time. The new response will now contain the geolocations for the addresses"
+
+```json
+[
+  {
+    "id": 1,
+    "street_number": "81",
+    "street_name": "Bay St",
+    "details": "Suite 4400",
+    "city": "Toronto",
+    "province": "ON",
+    "postal_code": "M5J 0E7",
+    "country_code": "CA",
+    "latitude": 43.64423,
+    "longitude": -79.37808
+  },
+  {
+    "id": 2,
+    "street_number": "6795",
+    "street_name": "Marconi Street",
+    "details": "Suite 401",
+    "city": "Montreal",
+    "province": "QC",
+    "postal_code": "H2S 3J9",
+    "country_code": "CA",
+    "latitude": 45.53052,
+    "longitude": -73.61581
+  },
+  ...
+  {
+    "id": 11,
+    "street_number": "375",
+    "street_name": "Water Street",
+    "details": "Suite 710",
+    "city": "Vancouver",
+    "province": "BC",
+    "postal_code": "V6B 5C6",
+    "country_code": "CA",
+    "latitude": 49.28484,
+    "longitude": -123.11023
+  }
+]
+```
+
+### Explaining the code
+
+Inside the _dotnet_ folder, you'll find the all the backend code that we will use to fetch the database locations and enrich the addresses. Let's breakdown file by file.
+
+1. Locations.cs
+
+This model represents the Location table in our database. Note that the _latitude_ and _longitude_ values are nullable, because when we query for the addresses for the first time, they won't exist.
+
+2. GetLocations.cs
+
+This is the function that will be used in our front-end web application to search for the address geolocation and populate the map.
+
+3. EnrichDatabase.cs
+
+This function searches for addresses without geolocations, calls the SearchForAddress API from Azure Maps to colelct the latitude and longitude for all locations and store them in the database.
+
+#### Azure Maps
+
+At this point, let's talk about how we are leveraging [Azure Maps](https://azuremaps.com/) to achieve the database enrichment process.
+
+Azure Maps provides multiple APIs for you to geocode(generate a geolocation from an address) and reverse-geocode(generate an address from a geolocation) addresses. In this particular example, we will use the API **_SearchStructuredAddressAsync_** for our task. This API is perfect for our use case, as we have a broken down address structured that we can pass as a parameter to retrieve the geolocation as a response.
+
+Let's look at the _AzureMapsHandler.cs_ file
+
+```csharp
+ public class AzureMapsHandler
+{
+    private MapsSearchClient searchClient;
+ 
+    public AzureMapsHandler()
+    {
+        //Get azure maps key from configuration file
+        string azureMapsKey = Environment.GetEnvironmentVariable("AzureMapsKey", EnvironmentVariableTarget.Process);
+
+        // Create a SearchClient that will authenticate through Subscription Key (Shared key)
+        AzureKeyCredential credential = new AzureKeyCredential(azureMapsKey);
+        this.searchClient = new MapsSearchClient(credential);
+    }
+
+    public async Task<Location> SearchForAddress(Location location)
+    {
+        //Create Structured address object from database query
+        var address = new StructuredAddress
+        {
+            CountryCode = location.country_code,
+            StreetNumber = location.street_number,
+            StreetName = location.street_name,
+            Municipality = location.city,
+            CountrySubdivision = location.province,
+            PostalCode = location.postal_code
+        };
+
+        //Call the SearchStructuredAddressAsync API to query for the address geolocation
+        Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
+
+        SearchAddressResultItem resultItem = searchResult.Value.Results[0];
+        location.latitude = resultItem.Position.Latitude;
+        location.longitude = resultItem.Position.Longitude;
+        
+        return location;
+    }
+}
+
+When we instantiate the class, we create a credential using the Azure Maps key that we have stored as an environment variable. After that, we use this credential to create our _MapsSearchClient_. 
+
+```csharp
+AzureKeyCredential credential = new AzureKeyCredential(azureMapsKey);
+this.searchClient = new MapsSearchClient(credential);
+```
+You can also use managed identities for a more secure solution to generate your credentials. Follow [this guide](https://techcommunity.microsoft.com/t5/azure-maps-blog/managed-identities-for-azure-maps/ba-p/3666312) if you choose this approach. 
+ 
+Now, we create a StructuredAddress object from the location passed as a parameter. 
+ 
+ ```csharp
+var address = new StructuredAddress
+{
+    CountryCode = location.country_code,
+    StreetNumber = location.street_number,
+    StreetName = location.street_name,
+    Municipality = location.city,
+    CountrySubdivision = location.province,
+    PostalCode = location.postal_code
+};
+```
+
+Finally, we call the _SearchStructureAddressAsync_ API passing the structured address as a parameter and update the location with the latitude and longitude from the response.
+
+```csharp
+Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
+SearchAddressResultItem resultItem = searchResult.Value.Results[0];
+location.latitude = resultItem.Position.Latitude;
+location.longitude = resultItem.Position.Longitude;
+```
+
+If you want to see more **Search** samples, follow [this resource](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/maps/Azure.Maps.Search/samples/SearchAddressSamples.md). To learn more about the **Azure Maps C# SDK**, read [this](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-dev-guide-csharp-sdk).
+
+#### Geocode storage considerations
+TODO
