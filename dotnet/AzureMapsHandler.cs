@@ -6,38 +6,24 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AzureMaps
 {
-    public sealed class AzureMapsHandler
+    public class AzureMapsHandler
     {
-        private static int counter = 0;
-        private static AzureMapsHandler instance = null;
 
         private MapsSearchClient searchClient;
-        public static AzureMapsHandler GetInstance
+
+        public AzureMapsHandler()
         {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new AzureMapsHandler();
+            //Get azure maps key from configuration file
+            string azureMapsKey = Environment.GetEnvironmentVariable("AzureMapsKey", EnvironmentVariableTarget.Process);
 
-                    //Get azure maps key from configuration file
-                    string azureMapsKey = Environment.GetEnvironmentVariable("AzureMapsKey", EnvironmentVariableTarget.Process);
-
-                    // Create a SearchClient that will authenticate through Subscription Key (Shared key)
-                    AzureKeyCredential credential = new AzureKeyCredential(azureMapsKey);
-                    instance.searchClient = new MapsSearchClient(credential);
-                }
-                return instance;
-            }
+            // Create a SearchClient that will authenticate through Subscription Key (Shared key)
+            AzureKeyCredential credential = new AzureKeyCredential(azureMapsKey);
+            this.searchClient = new MapsSearchClient(credential);
         }
 
-        private AzureMapsHandler()
-        {
-            counter++;
-
-        }
         public async Task<Location> SearchForAddress(Location location)
         {
+            //Create Structured address object from database query
             var address = new StructuredAddress
             {
                 CountryCode = location.country_code,
@@ -48,7 +34,8 @@ namespace Microsoft.AzureMaps
                 PostalCode = location.postal_code
             };
 
-            Response<SearchAddressResult> searchResult = await instance.searchClient.SearchStructuredAddressAsync(address);
+            //Call the SearchStructuredAddressAsync API to query for the address geolocation
+            Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
 
             SearchAddressResultItem resultItem = searchResult.Value.Results[0];
 

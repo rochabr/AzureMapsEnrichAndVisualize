@@ -10,15 +10,15 @@ using System.Collections.Generic;
 
 namespace Microsoft.AzureMaps
 {
-    public static class LocationFn
+    public static class GetLocations
     {
         [FunctionName("GetLocations")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "locations")] HttpRequest req,
-            ILogger log,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "locations")]
+                HttpRequest req, ILogger log,
             [Sql("select * from Locations",
-            CommandType = System.Data.CommandType.Text,
-            ConnectionStringSetting = "SqlConnectionString")]
+                CommandType = System.Data.CommandType.Text,
+                ConnectionStringSetting = "SqlConnectionString")]
             IEnumerable<Location> location)
         {
             return new OkObjectResult(location);

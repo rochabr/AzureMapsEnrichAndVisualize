@@ -21,9 +21,10 @@ namespace Microsoft.AzureMaps
         {
             List<Location> result = new List<Location>();
 
+            //for every location, call SearchForAddress to collect the geolocation and populate the array
             foreach (Location l in locations)
             {
-                AzureMapsHandler mapsHandler = AzureMapsHandler.GetInstance;
+                AzureMapsHandler mapsHandler = new AzureMapsHandler();
                 Location location = await mapsHandler.SearchForAddress(l);
                 result.Add(location);
 
@@ -31,7 +32,6 @@ namespace Microsoft.AzureMaps
             }
 
             return new CreatedResult($"/api/enrich", "204");
-            //return (ActionResult)new OkObjectResult(locationsI);
         }
     }
 }
