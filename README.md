@@ -173,6 +173,100 @@ Open your _local.settings.json_ file and add the following line at the end:
 "AzureMapsKey": "{Your key copied in the previous step}"
 ```
 
+#### Running the solution
+
+Press F5 to start debugging the backend application.
+
+First, run the _GetLocations_ function. You should see a list of addresses with no latitude and longitude:
+
+```json
+[
+  {
+    "id": 1,
+    "street_number": "81",
+    "street_name": "Bay St",
+    "details": "Suite 4400",
+    "city": "Toronto",
+    "province": "ON",
+    "postal_code": "M5J 0E7",
+    "country_code": "CA",
+    "latitude": null,
+    "longitude": null
+  },
+  {
+    "id": 2,
+    "street_number": "6795",
+    "street_name": "Marconi Street",
+    "details": "Suite 401",
+    "city": "Montreal",
+    "province": "QC",
+    "postal_code": "H2S 3J9",
+    "country_code": "CA",
+    "latitude": null,
+    "longitude": null
+  }
+  ...
+  {
+    "id": 11,
+    "street_number": "375",
+    "street_name": "Water Street",
+    "details": "Suite 710",
+    "city": "Vancouver",
+    "province": "BC",
+    "postal_code": "V6B 5C6",
+    "country_code": "CA",
+    "latitude": null,
+    "longitude": null
+  }
+]
+```
+
+Now, run the _EnrichDatabase_ function. If no problems appear in the console, you should see the a **204** response code. 
+
+Finally, run _GetLocations_ for a second time. The new response will now contain the geolocations for the addresses"
+
+```json
+[
+  {
+    "id": 1,
+    "street_number": "81",
+    "street_name": "Bay St",
+    "details": "Suite 4400",
+    "city": "Toronto",
+    "province": "ON",
+    "postal_code": "M5J 0E7",
+    "country_code": "CA",
+    "latitude": 43.64423,
+    "longitude": -79.37808
+  },
+  {
+    "id": 2,
+    "street_number": "6795",
+    "street_name": "Marconi Street",
+    "details": "Suite 401",
+    "city": "Montreal",
+    "province": "QC",
+    "postal_code": "H2S 3J9",
+    "country_code": "CA",
+    "latitude": 45.53052,
+    "longitude": -73.61581
+  },
+  ...
+  {
+    "id": 11,
+    "street_number": "375",
+    "street_name": "Water Street",
+    "details": "Suite 710",
+    "city": "Vancouver",
+    "province": "BC",
+    "postal_code": "V6B 5C6",
+    "country_code": "CA",
+    "latitude": 49.28484,
+    "longitude": -123.11023
+  }
+]
+```
+
 ### Explaining the code
 
 Inside the _dotnet_ folder, you'll find the all the backend code that we will use to fetch the database locations and enrich the addresses. Let's breakdown file by file.
@@ -258,7 +352,7 @@ var address = new StructuredAddress
 };
 ```
 
-Finally, we call the _SearchStructureAddressAsync_ API passing the structured address as a parameter and update the location with the latitude and longitude from the resppnse.
+Finally, we call the _SearchStructureAddressAsync_ API passing the structured address as a parameter and update the location with the latitude and longitude from the response.
 
 ```csharp
 Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
@@ -267,6 +361,7 @@ location.latitude = resultItem.Position.Latitude;
 location.longitude = resultItem.Position.Longitude;
 ```
 
+If you want to see more **Search** samples, follow [this resource](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/maps/Azure.Maps.Search/samples/SearchAddressSamples.md). To learn more about the Azure Maps C# SDK, read [this](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-dev-guide-csharp-sdk).
 
-
-
+#### Geocode storage considerations
+TODO
