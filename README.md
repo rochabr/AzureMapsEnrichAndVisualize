@@ -119,49 +119,151 @@ First, install [Azure Functions Core Tools](https://docs.microsoft.com/azure/azu
 
 Then, create a function app for .NET by following [this guide](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-csharp?tabs=in-process) to create your functions on Visual Studio code and publish them to your Azure Subscription. Create one called _EnrichDatabase_ and another called _GetLocations_. 
 
-After that, enable SQL bindings on the function app. More information can be found in the [Azure SQL bindings for Azure Functions docs](https://aka.ms/sqlbindings).
+You can also skip the above step and clone this repository, which contains the code for both functions and the Azure Maps handler.
 
-    Install the extension:
+#### Enable SQL bindings
 
-    ```powershell
-    dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
-    ```
+Now, let's enable SQL bindings on the function app. First, install the extension:
+
+```powershell
+dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
+```
+
+After that, get the SQL connection string from your database.
+
+<details>
+  <summary>Local SQL Server</summary>
+  - Use this connection string, replacing the placeholder values for the database and password.</br>
+   </br>
+   <code>Server=localhost;Initial Catalog={db_name};Persist Security Info=False;User ID=sa;Password={your_password};</code>
+  </details>
+
+  <details>
+  <summary>Azure SQL Server</summary>
+  - Browse to the SQL Database resource in the <a href="https://ms.portal.azure.com/">Azure portal</a></br>
+  - In the left blade click on the <b>Connection Strings</b> tab</br>
+  - Copy the <b>SQL Authentication</b> connection string</br>
+   </br>
+   (<i>Note: when pasting in the connection string, you will need to replace part of the connection string where it says '{your_password}' with your Azure SQL Server password</i>)
+</details>
     
+Open the generated `local.settings.json` file and in the `Values` section verify you have the below. If not, add the below and replace `{connection_string}` with the your connection string from the previous step:
+
+```json
+"AzureWebJobsStorage": "UseDevelopmentStorage=true",
+"AzureWebJobsDashboard": "UseDevelopmentStorage=true",
+"SqlConnectionString": "{connection_string}"
+```
+
 Follow [this guide](https://github.com/Azure/azure-functions-sql-extension/blob/main/docs/SetupGuide_Dotnet.md) for a deeper lesson on SQL bindings.
 
-#### Configure Function App
+#### Explaining the code
 
-Once you have your Function App you need to configure it for use with Azure SQL bindings for Azure Functions.
+Inside the _dotnet_ folder, you'll find the all the backend code that we will use to fetch the database locations and enrich the addresses. Let's breakdown file by file.
 
-1. Ensure you have Azure Storage Emulator running. This is specific to the sample functions in this repository with a non-HTTP trigger. For information on the Azure Storage Emulator, refer to the docs on its use in [functions local development](https://docs.microsoft.com/azure/azure-functions/functions-app-settings#azurewebjobsstorage) and [installation](https://docs.microsoft.com/azure/storage/common/storage-use-emulator#get-the-storage-emulator).
+1. _Locations.cs_
 
-2. Get your SQL connection string
+```csharp
+public class Location
+{
+    public int id { get; set; }
+    public string street_number { get; set; }
+    public string street_name { get; set; }
+    public string details { get; set; }
+    public string city { get; set; }
+    public string province { get; set; }
+    public string postal_code { get; set; }
+    public string country_code { get; set; }
+    public double? latitude { get; set; }
+    public double? longitude { get; set; }
+}
+```
 
-   <details>
-   <summary>Local SQL Server</summary>
-   - Use this connection string, replacing the placeholder values for the database and password.</br>
-    </br>
-    <code>Server=localhost;Initial Catalog={db_name};Persist Security Info=False;User ID=sa;Password={your_password};</code>
-   </details>
+2. GetLocations
+```csharp
+public static class GetLocations
+{
+    [FunctionName("GetLocations")]
+    public static async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "locations")] HttpRequest req,
+        ILogger log,
+        [Sql("select * from Locations",
+        CommandType = System.Data.CommandType.Text,
+        ConnectionStringSetting = "SqlConnectionString")]
+        IEnumerable<Location> location)
+    {
+        return new OkObjectResult(location);
+    }
+}
+```
+3. EnrichDatabase
 
-   <details>
-   <summary>Azure SQL Server</summary>
-   - Browse to the SQL Database resource in the <a href="https://ms.portal.azure.com/">Azure portal</a></br>
-   - In the left blade click on the <b>Connection Strings</b> tab</br>
-   - Copy the <b>SQL Authentication</b> connection string</br>
-    </br>
-    (<i>Note: when pasting in the connection string, you will need to replace part of the connection string where it says '{your_password}' with your Azure SQL Server password</i>)
-   </details>
+```csharp
+public static class EnrichDatabase
+{
+    [FunctionName("EnrichDatabase")]
+    public static async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "enrich")] HttpRequest req,
+         [Sql("select * from Locations where latitude is null and longitude is null", 
+             CommandType = System.Data.CommandType.Text,
+             ConnectionStringSetting = "SqlConnectionString")]
+             IEnumerable<Location> locations,
+         [Sql("dbo.Locations", ConnectionStringSetting = "SqlConnectionString")]
+             IAsyncCollector<Location> locationsI)
+    {
+        List<Location> result = new List<Location>();
 
-3. Open the generated `local.settings.json` file and in the `Values` section verify you have the below. If not, add the below and replace `{connection_string}` with the your connection string from the previous step:
+        foreach (Location l in locations)
+        {
+            AzureMapsHandler mapsHandler = AzureMapsHandler.GetInstance;
+            Location location = await mapsHandler.SearchForAddress(l);
+            result.Add(location);
 
-    ```json
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
-    "SqlConnectionString": "{connection_string}"
-    ```
+            await locationsI.AddAsync(location);
+        }
 
+        return new CreatedResult($"/api/enrich", "204");
+    }
+}
+```
 
-#### GetGeolocationsNull
+4. AzureMapsHandler
 
+```csharp
+ public class AzureMapsHandler
+{
+    private MapsSearchClient searchClient;
+ 
+    public AzureMapsHandler()
+    {
+        //Get azure maps key from configuration file
+        string azureMapsKey = Environment.GetEnvironmentVariable("AzureMapsKey", EnvironmentVariableTarget.Process);
 
+        // Create a SearchClient that will authenticate through Subscription Key (Shared key)
+        AzureKeyCredential credential = new AzureKeyCredential(azureMapsKey);
+        this.searchClient = new MapsSearchClient(credential);
+    }
+
+    public async Task<Location> SearchForAddress(Location location)
+    {
+        //Create Structured address object from database query
+        var address = new StructuredAddress
+        {
+            CountryCode = location.country_code,
+            StreetNumber = location.street_number,
+            StreetName = location.street_name,
+            Municipality = location.city,
+            CountrySubdivision = location.province,
+            PostalCode = location.postal_code
+        };
+
+        //Call the SearchStructuredAddressAsync API to query for the address geolocation
+        Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
+
+        SearchAddressResultItem resultItem = searchResult.Value.Results[0];
+        location.latitude = resultItem.Position.Latitude;
+        location.longitude = resultItem.Position.Longitude;
+        
+        return location;
+    }
+}
