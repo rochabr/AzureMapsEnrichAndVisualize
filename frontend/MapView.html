@@ -154,51 +154,44 @@
 
             fetch('http://localhost:7071/api/locations')
                 .then(response => response.json())
-                .then(json => console.log(json));
+                .then(results => {
+                    console.log(results)
 
-            // var query = document.getElementById("search-input").value;
-            // searchURL.searchPOI(atlas.service.Aborter.timeout(10000), query, {
-            //     lon: map.getCamera().center[0],
-            //     lat: map.getCamera().center[1],
-            //     maxFuzzyLevel: 4,
-            //     view: 'Auto'
-            // }).then((results) => {
+                    // //Extract GeoJSON feature collection from the response and add it to the datasource
+                    // var data = results.geojson.getFeatures();
+                    // datasource.add(data);
 
-            //     //Extract GeoJSON feature collection from the response and add it to the datasource
-            //     var data = results.geojson.getFeatures();
-            //     datasource.add(data);
+                    // if (centerMapOnResults) {
+                    //     map.setCamera({
+                    //         bounds: data.bbox
+                    //     });
+                    // }
+                    // console.log(data);
+                    // //Create the HTML for the results list.
+                    // var html = [];
+                    // for (var i = 0; i < data.features.length; i++) {
+                    //     var r = data.features[i];
+                    //     html.push('<li onclick="itemClicked(\'', r.id, '\')" onmouseover="itemHovered(\'', r.id, '\')">')
+                    //     html.push('<div class="title">');
+                    //     if (r.properties.poi && r.properties.poi.name) {
+                    //         html.push(r.properties.poi.name);
+                    //     } else {
+                    //         html.push(r.properties.address.freeformAddress);
+                    //     }
+                    //     html.push('</div><div class="info">', r.properties.type, ': ', r.properties.address.freeformAddress, '</div>');
+                    //     if (r.properties.poi) {
+                    //         if (r.properties.phone) {
+                    //             html.push('<div class="info">phone: ', r.properties.poi.phone, '</div>');
+                    //         }
+                    //         if (r.properties.poi.url) {
+                    //             html.push('<div class="info"><a href="http://', r.properties.poi.url, '">http://', r.properties.poi.url, '</a></div>');
+                    //         }
+                    //     }
+                    //     html.push('</li>');
+                    //     resultsPanel.innerHTML = html.join('');
+                    // }
 
-            //     if (centerMapOnResults) {
-            //         map.setCamera({
-            //             bounds: data.bbox
-            //         });
-            //     }
-            //     console.log(data);
-            //     //Create the HTML for the results list.
-            //     var html = [];
-            //     for (var i = 0; i < data.features.length; i++) {
-            //         var r = data.features[i];
-            //         html.push('<li onclick="itemClicked(\'', r.id, '\')" onmouseover="itemHovered(\'', r.id, '\')">')
-            //         html.push('<div class="title">');
-            //         if (r.properties.poi && r.properties.poi.name) {
-            //             html.push(r.properties.poi.name);
-            //         } else {
-            //             html.push(r.properties.address.freeformAddress);
-            //         }
-            //         html.push('</div><div class="info">', r.properties.type, ': ', r.properties.address.freeformAddress, '</div>');
-            //         if (r.properties.poi) {
-            //             if (r.properties.phone) {
-            //                 html.push('<div class="info">phone: ', r.properties.poi.phone, '</div>');
-            //             }
-            //             if (r.properties.poi.url) {
-            //                 html.push('<div class="info"><a href="http://', r.properties.poi.url, '">http://', r.properties.poi.url, '</a></div>');
-            //             }
-            //         }
-            //         html.push('</li>');
-            //         resultsPanel.innerHTML = html.join('');
-            //     }
-
-            // });
+                });
         }
         function itemHovered(id) {
             //Show a popup when hovering an item in the result list.
