@@ -22,7 +22,7 @@
     <script src="https://atlas.microsoft.com/sdk/javascript/service/2/atlas-service.min.js"></script>
 
     <script>
-        var map, datasource, client, popup, resultsPanel, centerMapOnResults;
+        var map, datasource, client, popup, searchInput, resultsPanel, searchInputLength, centerMapOnResults;
 
         function GetMap() {
             //Initialize a map instance.
@@ -33,17 +33,6 @@
 
                 //Add authentication details for connecting to Azure Maps.
                 authOptions: {
-                    //Use Azure Active Directory authentication.
-                    // authType: 'anonymous',
-                    // clientId: 'e6b6ab59-eb5d-4d25-aa57-581135b927f0', //Your Azure Maps client id for accessing your Azure Maps account.
-                    // getToken: function (resolve, reject, map) {
-                    //     //URL to your authentication service that retrieves an Azure Active Directory Token.
-                    //     var tokenServiceUrl = "https://samples.azuremaps.com/api/GetAzureMapsToken";
-
-                    //     fetch(tokenServiceUrl).then(r => r.text()).then(token => resolve(token));
-                    // }
-
-                    //Alternatively, use an Azure Maps key.Get an Azure Maps key at https://azure.com/maps. NOTE: The primary key should be used as the key.
                     authType: 'subscriptionKey',
                     subscriptionKey: '<Your subscription key>'
                 }
@@ -51,6 +40,10 @@
 
             //Store a reference to the Search Info Panel.
             resultsPanel = document.getElementById("results-panel");
+
+            //Add key up event to the search box. 
+            searchInput = document.getElementById("search-input");
+            searchInput.addEventListener("keyup", searchInputKeyup);
 
             //Create a popup which we can reuse for each result.
             popup = new atlas.Popup();
@@ -89,63 +82,25 @@
             });
 
         }
-
-        function search() {
-            //Remove any previous results from the map.
-            datasource.clear();
-            popup.close();
-            resultsPanel.innerHTML = '';
-
-            //Use MapControlCredential to share authentication between a map control and the service module.
-            var pipeline = atlas.service.MapsURL.newPipeline(new atlas.service.MapControlCredential(map));
-
-            //Construct the SearchURL object
-            var searchURL = new atlas.service.SearchURL(pipeline);
-
-            var query = document.getElementById("search-input").value;
-            searchURL.searchPOI(atlas.service.Aborter.timeout(10000), query, {
-                lon: map.getCamera().center[0],
-                lat: map.getCamera().center[1],
-                maxFuzzyLevel: 4,
-                view: 'Auto'
-            }).then((results) => {
-
-                //Extract GeoJSON feature collection from the response and add it to the datasource
-                var data = results.geojson.getFeatures();
-                datasource.add(data);
-
-                if (centerMapOnResults) {
-                    map.setCamera({
-                        bounds: data.bbox
-                    });
+        function searchInputKeyup(e) {
+            centerMapOnResults = false;
+            if (searchInput.value.length >= minSearchInputLength) {
+                if (e.keyCode === 13) {
+                    centerMapOnResults = true;
                 }
-                console.log(data);
-                //Create the HTML for the results list.
-                var html = [];
-                for (var i = 0; i < data.features.length; i++) {
-                    var r = data.features[i];
-                    html.push('<li onclick="itemClicked(\'', r.id, '\')" onmouseover="itemHovered(\'', r.id, '\')">')
-                    html.push('<div class="title">');
-                    if (r.properties.poi && r.properties.poi.name) {
-                        html.push(r.properties.poi.name);
-                    } else {
-                        html.push(r.properties.address.freeformAddress);
+                //Wait 100ms and see if the input length is unchanged before performing a search. 
+                //This will reduce the number of queries being made on each character typed.
+                setTimeout(function () {
+                    if (searchInputLength == searchInput.value.length) {
+                        search();
                     }
-                    html.push('</div><div class="info">', r.properties.type, ': ', r.properties.address.freeformAddress, '</div>');
-                    if (r.properties.poi) {
-                        if (r.properties.phone) {
-                            html.push('<div class="info">phone: ', r.properties.poi.phone, '</div>');
-                        }
-                        if (r.properties.poi.url) {
-                            html.push('<div class="info"><a href="http://', r.properties.poi.url, '">http://', r.properties.poi.url, '</a></div>');
-                        }
-                    }
-                    html.push('</li>');
-                    resultsPanel.innerHTML = html.join('');
-                }
-
-            });
+                }, keyStrokeDelay);
+            } else {
+                resultsPanel.innerHTML = '';
+            }
+            searchInputLength = searchInput.value.length;
         }
+
         function searchForOffices() {
             //Remove any previous results from the map.
             datasource.clear();
@@ -155,87 +110,50 @@
             fetch('http://localhost:7071/api/locations')
                 .then(response => response.json())
                 .then(results => {
-                    console.log(results)
+                    //console.log(results)
 
-                    // //Extract GeoJSON feature collection from the response and add it to the datasource
-                    // var data = results.geojson.getFeatures();
-                    // datasource.add(data);
+                    var html = [];
+                    results.forEach(function (location) {
+                        // console.log(location.latitude)
+                        // console.log(location.longitude)
 
-                    // if (centerMapOnResults) {
-                    //     map.setCamera({
-                    //         bounds: data.bbox
-                    //     });
-                    // }
-                    // console.log(data);
-                    // //Create the HTML for the results list.
-                    // var html = [];
-                    // for (var i = 0; i < data.features.length; i++) {
-                    //     var r = data.features[i];
-                    //     html.push('<li onclick="itemClicked(\'', r.id, '\')" onmouseover="itemHovered(\'', r.id, '\')">')
-                    //     html.push('<div class="title">');
-                    //     if (r.properties.poi && r.properties.poi.name) {
-                    //         html.push(r.properties.poi.name);
-                    //     } else {
-                    //         html.push(r.properties.address.freeformAddress);
-                    //     }
-                    //     html.push('</div><div class="info">', r.properties.type, ': ', r.properties.address.freeformAddress, '</div>');
-                    //     if (r.properties.poi) {
-                    //         if (r.properties.phone) {
-                    //             html.push('<div class="info">phone: ', r.properties.poi.phone, '</div>');
-                    //         }
-                    //         if (r.properties.poi.url) {
-                    //             html.push('<div class="info"><a href="http://', r.properties.poi.url, '">http://', r.properties.poi.url, '</a></div>');
-                    //         }
-                    //     }
-                    //     html.push('</li>');
-                    //     resultsPanel.innerHTML = html.join('');
-                    // }
+                        var marker = new atlas.HtmlMarker({
+                            color: '#357EC7 ',
+                            position: [location.longitude, location.latitude],
+                            popup: new atlas.Popup({
+                                content: '<div style="padding:10px">' + location.street_number +
+                                    ' ' + location.street_name + '<br>' + location.details + '<br>'
+                                    + location.city + ' ' + location.province + '<br>' + location.postal_code + '</div>',
+                                pixelOffset: [0, -30]
+                            })
+                        });
 
-                });
+                        map.markers.add(marker)
+
+                        map.events.add('click', marker, () => {
+                            marker.togglePopup();
+                        });
+
+                        //Create the HTML for the results list.
+                        html.push('<li onclick="itemClicked(\'', [location.longitude, location.latitude], '\')">')
+                        html.push('<div class="title">');
+                        html.push(location.street_number + ' ' + location.street_name + ' ' + location.details);
+
+                        html.push('<div class="info">', location.city, ' ', location.province, '</div>');
+                        html.push('<div class="info">', location.postal_code, '</div>');
+                    })
+
+                    html.push('</li>');
+                    resultsPanel.innerHTML = html.join('');
+                })
         }
-        function itemHovered(id) {
-            //Show a popup when hovering an item in the result list.
-            var shape = datasource.getShapeById(id);
-            showPopup(shape);
-        }
-        function itemClicked(id) {
+        function itemClicked(location) {
+            console.log(location)
             //Center the map over the clicked item from the result list.
-            var shape = datasource.getShapeById(id);
             map.setCamera({
-                center: shape.getCoordinates(),
-                zoom: 17
+                center: location,
+                zoom: 10
             });
-        }
-        function showPopup(shape) {
-            var properties = shape.getProperties();
-            //Create the HTML content of the POI to show in the popup.
-            var html = ['<div class="poi-box">'];
-            //Add a title section for the popup.
-            html.push('<div class="poi-title-box"><b>');
-
-            if (properties.poi && properties.poi.name) {
-                html.push(properties.poi.name);
-            } else {
-                html.push(properties.address.freeformAddress);
-            }
-            html.push('</b></div>');
-            //Create a container for the body of the content of the popup.
-            html.push('<div class="poi-content-box">');
-            html.push('<div class="info location">', properties.address.freeformAddress, '</div>');
-            if (properties.poi) {
-                if (properties.poi.phone) {
-                    html.push('<div class="info phone">', properties.phone, '</div>');
-                }
-                if (properties.poi.url) {
-                    html.push('<div><a class="info website" href="http://', properties.poi.url, '">http://', properties.poi.url, '</a></div>');
-                }
-            }
-            html.push('</div></div>');
-            popup.setOptions({
-                position: shape.getCoordinates(),
-                content: html.join('')
-            });
-            popup.open(map);
         }
     </script>
     <style>
@@ -253,6 +171,61 @@
             position: relative;
             width: 100%;
             height: 100%;
+        }
+
+        #search {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 400px;
+            box-shadow: 0px 24px 74px 0px rgba(0, 0, 0, .32);
+            border: 1px solid #ccc;
+            overflow-y: hidden;
+        }
+
+        #search>.search-input-box {
+            background: #fff;
+            height: 72px;
+            width: 100%;
+        }
+
+        #search>.search-input-box>.search-input-group {
+            position: relative;
+            top: 20px;
+            left: 20px;
+            width: 358px;
+            height: 30px;
+            margin: 0;
+            padding: 0;
+            border: 1px dotted #ccc;
+        }
+
+        #search>.search-input-box>.search-input-group>.search-icon {
+            margin: 0;
+            padding: 0;
+            background-size: 20px 20px;
+            width: 30px;
+            height: 30px;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: url("data:image/svg+xml,%3Csvg id='Layer_1' data-name='Layer 1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctitle%3E-%3C/title%3E%3Cpath d='M10.5,0a5.4457,5.4457,0,0,1,2.7734.75A5.6134,5.6134,0,0,1,15.25,2.7266a5.5224,5.5224,0,0,1,.5547,4.2344A5.4147,5.4147,0,0,1,15.25,8.2734,5.6134,5.6134,0,0,1,13.2734,10.25a5.5014,5.5014,0,0,1-4.6445.4219,5.6256,5.6256,0,0,1-1.6445-.9453L.8516,15.8516A.4807.4807,0,0,1,.5,16a.4823.4823,0,0,1-.3516-.1484.4905.4905,0,0,1,0-.7031l6.125-6.1328a5.6194,5.6194,0,0,1-.9453-1.6445A5.39,5.39,0,0,1,5,5.5a5.4457,5.4457,0,0,1,.75-2.7734A5.6134,5.6134,0,0,1,7.7266.75,5.4457,5.4457,0,0,1,10.5,0Zm0,10a4.347,4.347,0,0,0,1.75-.3555A4.5254,4.5254,0,0,0,14.6445,7.25,4.347,4.347,0,0,0,15,5.5a4.347,4.347,0,0,0-.3555-1.75A4.5254,4.5254,0,0,0,12.25,1.3555a4.4854,4.4854,0,0,0-3.5,0A4.5254,4.5254,0,0,0,6.3555,3.75a4.4854,4.4854,0,0,0,0,3.5A4.5254,4.5254,0,0,0,8.75,9.6445,4.3487,4.3487,0,0,0,10.5,10Z' fill='%234b4b4b'/%3E%3C/svg%3E");
+        }
+
+        #search>.search-input-box>.search-input-group>input {
+            display: inline-block;
+            position: absolute;
+            top: 0px;
+            left: 30px;
+            width: calc(100% - 40px);
+            height: 100%;
+            margin: 0;
+            padding: 0 5px;
+            border-collapse: collapse;
+            border: 0px;
+        }
+
+        #search>.search-input-box>.search-input-group>input:focus {
+            outline: none;
         }
 
         #results-panel {
@@ -347,8 +320,13 @@
 
 <body onload="GetMap()">
     <div id="myMap"></div>
-
     <div id="search">
+        <div class="search-input-box">
+            <div class="search-input-group">
+                <div class="search-icon" type="button"></div>
+                <input id="search-input" type="text" placeholder="Search">
+            </div>
+        </div>
         <ul id="results-panel"></ul>
     </div>
 </body>
