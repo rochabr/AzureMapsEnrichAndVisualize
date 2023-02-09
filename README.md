@@ -363,5 +363,10 @@ location.longitude = resultItem.Position.Longitude;
 
 If you want to see more **Search** samples, follow [this resource](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/maps/Azure.Maps.Search/samples/SearchAddressSamples.md). To learn more about the **Azure Maps C# SDK**, read [this](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-dev-guide-csharp-sdk).
 
-#### Geocode storage considerations
-TODO
+### Geocode storage considerations
+
+In general, Azure Maps has specific terms of usage that prevent customers from caching or storing information delivered by the Azure Maps API including but not limited to geocodes and reverse geocodes for the purpose of scaling such results to serve multiple users, or to circumvent any functionality in Azure Maps.
+
+However, caching and storing results is permitted where the purpose of caching is to reduce latency times of Customer’s application. Results may not be stored for longer than: the validity period indicated in returned headers; or 6 months, whichever is the shorter. Notwithstanding the foregoing, Customer may retain continual access to geocodes as long as Customer maintains an active Azure account.
+
+## Conclusion
