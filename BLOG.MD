@@ -16,7 +16,41 @@ The Azure Function named _Enrich local data_ is responsible for searching for ad
 
 There is also a user accessing a web applicaiton that collects the locations from Azure SQL Server using the Azure Function _Get locations_ and generates a visualization layer with the Azure Maps SDK to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
 
-![Architecture diagram](https://user-images.githubusercontent.com/1051195/214759203-1ea95346-68b1-418b-a82d-454cf5084437.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1051195/214759203-1ea95346-68b1-418b-a82d-454cf5084437.png" alt="Architecture diagram"/>
+</p>
+
+### Address enrichment logical flow
+
+To enrich the database of addresses, the application makes a request to the database, querying for all addresses without geolocations. In return, it receives a list of addresses:
+
+<br>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1051195/218586495-e703a43a-241d-45e4-81a5-fbc56d53b7a3.png" alt="Logical flow for request addresses"/>
+</p>
+
+<br>
+
+With the full list of addresses without geolocation, the application makes single calls with every single address to Azure Maps, calling the _Search API_. Azure Maps in response, provides the geolocation for that particular address. The response adds that inforamtion to the item and saves it locally. The _Search API_ also provides  extra properties in the response that are ignored by the application in this example.
+
+<br>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1051195/218586517-72504705-20e2-4607-b82b-0af9258f8d51.png" alt="Logical flow for searching for geolocation"/>
+</p>
+
+<br>
+
+Lastly, the application saves the updated addresses with their corresponding geolocations to the database. 
+
+<br>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1051195/218586533-92406c5d-73c2-46c5-bf62-2a422234ac88.png" alt="Logical flow for searching for geolocation"/>
+</p>
+
+<br>
 
 ## Walkthrough
 
