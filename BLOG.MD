@@ -16,9 +16,13 @@ The Azure Function named _Enrich local data_ is responsible for searching for ad
 
 There is also a user accessing a web applicaiton that collects the locations from Azure SQL Server using the Azure Function _Get locations_ and generates a visualization layer with the Azure Maps SDK to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
 
+<br>
+
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/1051195/214759203-1ea95346-68b1-418b-a82d-454cf5084437.png" alt="Architecture diagram"/>
+  <img src="https://user-images.githubusercontent.com/1051195/218619577-55b2f7f4-4a8d-4d45-8fa5-d35d94fa1515.png" alt="Architecture diagram"/>
 </p>
+
+<br>
 
 ### Address enrichment logical flow
 
@@ -51,6 +55,31 @@ Lastly, the application saves the updated addresses with their corresponding geo
 </p>
 
 <br>
+
+### Address visualization- Logical flow
+
+The visualization layer contains a static web app, hosted in Azure, leveraging an Azure function to query the database for all addresses with geolocations. It then connects to Azure Maps to get the map tiles with dots representing the address.
+
+<br>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1051195/218613101-e7834cdf-2dee-4f77-aabc-94b6b4c4f083.png" alt="Map view flow"/>
+</p>
+
+<br>
+
+<br>
+
+This is the end result:
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1051195/218615805-40729f76-2e3f-4bb0-a96f-2854b64651bf.png" alt="Web app with a map showing the addresses"/>
+</p>
+
+<br>
+
+<br>
+
 
 ## Walkthrough
 
