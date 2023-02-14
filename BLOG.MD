@@ -54,7 +54,7 @@ Lastly, the application saves the updated addresses with their corresponding geo
 
 ## Walkthrough
 
-For a complete walkthrough on how to deploy the solution clone [TODO] this repository and follow the guide.
+For a detailed step-by-step on how to create this solution, clone [TODO] this repository and follow its instructions.
 
 ### Geocode storage considerations
 
