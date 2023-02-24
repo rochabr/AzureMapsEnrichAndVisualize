@@ -4,9 +4,9 @@
 
 To build this solution you will need:
 
-1. An Azure Subscription
-2. An Azure Maps subscription
-3. Visual Studio Code and Git installed on your local machine
+1. An Azure Subscription (sing up [here](https://azure.com/free) for free)
+2. An [Azure Maps](https://azure.com/maps) account
+3. [Visual Studio Code](https://code.visualstudio.com/) and Git installed on your local machine
 
 ### Creating a resource group
 
