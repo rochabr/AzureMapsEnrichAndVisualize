@@ -309,6 +309,7 @@ Let's look at the _AzureMapsHandler.cs_ file
         return location;
     }
 }
+```
 
 When we instantiate the class, we create a credential using the Azure Maps key that we have stored as an environment variable. After that, we use this credential to create our _MapsSearchClient_. 
 
