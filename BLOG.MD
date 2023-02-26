@@ -85,10 +85,17 @@ This is the end result:
 
 For a detailed step-by-step on how to create this solution, clone [TODO] this repository and follow its instructions.
 
-### Geocode storage considerations
+## Geocode storage considerations
 
 In general, Azure Maps has specific terms of usage that prevent customers from caching or storing information delivered by the Azure Maps API including but not limited to geocodes and reverse geocodes for the purpose of scaling such results to serve multiple users, or to circumvent any functionality in Azure Maps.
 
 However, caching and storing results is permitted where the purpose of caching is to reduce latency times of Customer’s application. Results may not be stored for longer than: the validity period indicated in returned headers; or 6 months, whichever is the shorter. Notwithstanding the foregoing, Customer may retain continual access to geocodes as long as Customer maintains an active Azure account.
 
 ## Conclusion
+
+Location data is powerful. When added to your analytics, it can provide valuable insight to corporations when making important decisions. Azure Maps provides a modern, secure and reliable cloud platform for any geospatial challenge that you may face. 
+
+In this blog post you learned how to enrich a database of addresses with [Azure Maps](https://azure.microsoft.com/en-us/products/azure-maps) by using the C# SDK within an Azure Function. You have also created a web page to visualize all results queries from the enriched database. For more practical and real-world examples, follow the [Azure Maps Blog](https://techcommunity.microsoft.com/t5/azure-maps-blog/bg-p/AzureMapsBlog).
+
+
+
