@@ -6,11 +6,29 @@ To build this solution you will need:
 
 1. An Azure Subscription (sing up [here](https://azure.com/free) for free)
 2. An [Azure Maps](https://azure.com/maps) account
-3. [Visual Studio Code](https://code.visualstudio.com/) and Git installed on your local machine
+3. [Visual Studio Code](https://code.visualstudio.com/) and [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed on your local machine
 
 ### Creating a resource group
 
 As a best practice and to facilitate tearing down the environment, follow [these instructions](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#create-resource-groups) to create a Resource Group in your Azure Subscription.
+
+### Creating an Azure Maps account
+
+Create a new Azure Maps account with the following steps:
+
+1. Select **Create a resource** in the upper left-hand corner of the [Azure portal](https://portal.azure.com).
+2. Type **Azure Maps** in the *Search services and Marketplace* box.
+3. Select **Azure Maps** in the drop-down list that appears, then select the **Create** button.
+4. On the **Create an Azure Maps Account resource** page, enter the following values then select the **Create** button:
+    * The *Subscription* that you want to use for this account.
+    * The *Resource group* name for this account. You may choose to *Create new* or *Select existing* resource group.
+    * The *Name* of your new Azure Maps account.
+    * The *Pricing tier* for this account. Select **Gen2**.
+    * Read the *License* and *Privacy Statement*, then select the checkbox to accept the terms.
+
+    ![azure-maps-account](https://user-images.githubusercontent.com/1051195/221387170-fa6888a0-c8ad-4f26-b6d6-dc420bdea64f.png)
+
+<a id="getkey"></a>
 
 ### Creating the database
 
@@ -95,45 +113,47 @@ We are going to be creating two functions:
 
 We will be coding the functions in C# to take advantage of [Azure Functions SQL Extensions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-azure-sql), which are easier to achieve in C# than other coding languages, as of now. However, you can also take advantage of them in Java, JavaScript, Powershell and Python. Overall, they expedite the development time to build the connectivity between the Azure Function and the Azure SQL database by creating a simpler process to generate inputs, outputs and triggers.
 
-First, install [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local)
+1. Install [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local)
 
-Then, create a function app for .NET by following [this guide](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-csharp?tabs=in-process) to create your functions on Visual Studio code and publish them to your Azure Subscription. Create one called _EnrichDatabase_ and another called _GetLocations_. 
+2. Create two function apps for .NET by following [this guide](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-csharp?tabs=in-process) to create your functions on Visual Studio code and publish them to your Azure Subscription. Create one called _EnrichDatabase_ and another called _GetLocations_. 
 
-Now, clone [this repository](TODO: add link to repository) containing the source code for both functions and the Azure Maps handler.
+3. Clone [this repository](TODO: add link to repository) containing the source code for both functions and the Azure Maps handler.
 
 #### Enable SQL bindings
 
-Now, let's enable SQL bindings on the function app. First, install the extension:
+Now, let's enable SQL bindings on the function app. 
+
+1. Install the extension:
 
 ```powershell
 dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
 ```
 
-After that, get the SQL connection string from your database.
+2. Get the SQL connection string from your database.
 
-<details>
-  <summary>Local SQL Server</summary>
-  - Use this connection string, replacing the placeholder values for the database and password.</br>
-   </br>
-   <code>Server=localhost;Initial Catalog={db_name};Persist Security Info=False;User ID=sa;Password={your_password};</code>
+  <details>
+    <summary>Local SQL Server</summary>
+    - Use this connection string, replacing the placeholder values for the database and password.</br>
+     </br>
+     <code>Server=localhost;Initial Catalog={db_name};Persist Security Info=False;User ID=sa;Password={your_password};</code>
   </details>
 
   <details>
-  <summary>Azure SQL Server</summary>
-  - Browse to the SQL Database resource in the <a href="https://ms.portal.azure.com/">Azure portal</a></br>
-  - In the left blade click on the <b>Connection Strings</b> tab</br>
-  - Copy the <b>SQL Authentication</b> connection string</br>
-   </br>
+    <summary>Azure SQL Server</summary>
+    - Browse to the SQL Database resource in the <a href="https://ms.portal.azure.com/">Azure portal</a></br>
+    - In the left blade click on the <b>Connection Strings</b> tab</br>
+    - Copy the <b>SQL Authentication</b> connection string</br>
+    </br>
    (<i>Note: when pasting in the connection string, you will need to replace part of the connection string where it says '{your_password}' with your Azure SQL Server password</i>)
-</details>
+  </details>
     
-Open the generated `local.settings.json` file and in the `Values` section verify you have the below. If not, add the below and replace `{connection_string}` with the your connection string from the previous step:
+3. Open the generated `local.settings.json` file and in the `Values` section verify you have the below. If not, add the below and replace `{connection_string}` with the your connection string from the previous step:
 
-```json
-"AzureWebJobsStorage": "UseDevelopmentStorage=true",
-"AzureWebJobsDashboard": "UseDevelopmentStorage=true",
-"SqlConnectionString": "{connection_string}"
-```
+   ```json
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
+    "SqlConnectionString": "{connection_string}"
+   ```
 
 Follow [this guide](https://github.com/Azure/azure-functions-sql-extension/blob/main/docs/SetupGuide_Dotnet.md) for a deeper lesson on SQL bindings.
 
@@ -147,6 +167,8 @@ dotnet add package Azure.Maps.Search --prerelease
 
 We also need the _Azure Maps primary key_ which can get from within the Azure Portal. Navigate to your Azure Maps resource and copy the _Primary key_ content from the **Authentication** tab.
 
+![image](https://user-images.githubusercontent.com/1051195/221387224-bf76cb06-280a-43eb-a53b-a41a59d84d14.png)
+
 Open your _local.settings.json_ file and add the following line at the end:
 
 ```powershell
@@ -155,7 +177,9 @@ Open your _local.settings.json_ file and add the following line at the end:
 
 #### Running the solution
 
-Press F5 to start debugging the backend application.
+In Visual Studio Code, open the terminal and press F5 to start debugging the backend application. YOu should see the two functions deployed locally.
+
+![image](https://user-images.githubusercontent.com/1051195/221387050-25b135b9-4b45-4cdf-8db1-f36f32a57cb8.png)
 
 First, run the _GetLocations_ function. You should see a list of addresses with no latitude and longitude:
 
