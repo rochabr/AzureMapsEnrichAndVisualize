@@ -21,6 +21,7 @@
 
     <script>
         var map, datasource, popup;
+        var getLocationURL = 'http://localhost:7071/api/locations';
 
         function GetMap() {
             //Initialize a map instance.
@@ -53,7 +54,7 @@
                 datasource = new atlas.source.DataSource();
                 map.sources.add(datasource);
 
-                fetch('http://localhost:7071/api/locations')
+                fetch(getLocationURL)
                     .then(response => response.json())
                     .then(results => {
                         results.forEach(function (location) {
