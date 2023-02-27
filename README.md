@@ -374,4 +374,51 @@ In general, Azure Maps has specific [terms](https://www.microsoft.com/licensing/
 
 However, caching and storing results is permitted where the purpose of caching is to reduce latency times of Customer’s application. Results may not be stored for longer than: the validity period indicated in returned headers; or 6 months, whichever is the shorter. Notwithstanding the foregoing, Customer may retain continual access to geocodes as long as Customer maintains an active Azure account.
 
-## Conclusion
+## Visualizing the results 
+
+Inside the folder _frontend_ open _MapView.html_. We need to replace two lines to get this web page working.
+
+1. In line 24, replace the value of getLocationURL with your local or remote function URL, pointing to the API we created in the previous step:
+
+   ```javascript
+   const getLocationURL = '<Your API URL>';
+   ```
+
+2. In line 46, inside the map initialization function _GetMap()_, add you Azure Maps subscription key to authenticate to your resource:
+
+   ```javascript
+   //Initialize a map instance.
+   map = new atlas.Map('myMap', {
+       center: [-110.000880, 56.043483],
+       zoom: 2,
+       view: 'Auto',
+
+       //Add authentication details for connecting to Azure Maps.
+       authOptions: {
+           //Use Azure Active Directory authentication.
+           // authType: 'anonymous',
+           // clientId: 'e6b6ab59-eb5d-4d25-aa57-581135b927f0', //Your Azure Maps client id for accessing your Azure Maps account.
+           // getToken: function (resolve, reject, map) {
+           //     //URL to your authentication service that retrieves an Azure Active Directory Token.
+           //     var tokenServiceUrl = "https://samples.azuremaps.com/api/GetAzureMapsToken";
+
+           //     fetch(tokenServiceUrl).then(r => r.text()).then(token => resolve(token));
+           // }
+
+           //Alternatively, use an Azure Maps key. Get an Azure Maps key at https://azure.com/maps. NOTE: The primary key should be used as the key.
+           authType: 'subscriptionKey',
+           subscriptionKey: '<Your subscription key>'
+       }
+   });
+   ```
+   
+3. Open _MapView.html_, you should see the following result:
+
+   ![image](https://user-images.githubusercontent.com/1051195/221454289-1b5201fb-9225-433a-91b9-88e1c4d5191e.png)
+
+## Tearing down the environment
+
+1. Open the resource group you created for this project.
+2. Select **Delete resource group**.
+
+    ![delete azure resource group](https://user-images.githubusercontent.com/1051195/221454826-1176eadc-69ac-4d80-aef8-3bdceff02a6c.png)
