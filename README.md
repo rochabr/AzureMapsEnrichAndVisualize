@@ -1,18 +1,20 @@
 # Enrich your location data with Azure Maps
 
+There are many situations where you have a collection of addresses but they are not really useful unless you can know exactly what and where they represent. Enriching those addresses with the ability to be understood geographically opens up infinite use cases to leverage that data for proximity calculation and visualization experiences that can not be accomplished with addresses alone. The following steps show how you might easily prepare a set of address data for such scenarios.
+
 ### Pre-requisites
 
 To build this solution you will need:
 
-1. An Azure Subscription (sing up [here](https://azure.com/free) for free)
+1. An Azure Subscription (sign up [here](https://azure.com/free) for free)
 2. An [Azure Maps](https://azure.com/maps) account
 3. [Visual Studio Code](https://code.visualstudio.com/) and [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed on your local machine
 
-### Creating a resource group
+### Create a resource group
 
-As a best practice and to facilitate tearing down the environment, follow [these instructions](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#create-resource-groups) to create a Resource Group in your Azure Subscription.
+As a best practice, and to facilitate tearing down the environment when you are done, use these [instructions](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#create-resource-groups) to create a Resource Group in your Azure Subscription.
 
-### Creating an Azure Maps account
+### Create an Azure Maps account
 
 Create a new Azure Maps account with the following steps:
 
@@ -30,15 +32,15 @@ Create a new Azure Maps account with the following steps:
 
 <a id="getkey"></a>
 
-### Creating the database
+### Create the database
 
-Follow the instructions [here](https://learn.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?view=azuresql&tabs=azure-portal), to create an Azure SQL Database Server and a database, you can use any name you want to create your resources. In this tutorial we will call the database _azuremapsdb_.
+Follow these [instructions](https://learn.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?view=azuresql&tabs=azure-portal), to create an Azure SQL Database Server and a database, you can use any name you want to create your resources. In this tutorial we will call the database _azuremapsdb_.
 
-When all stabase resources have been provisioned, in the Azure Portal navigate to your database server and update the network configurations to allow public network access from selected networks, add your IP address in the firewall rules as an allowed inbound traffic rule for local testing and select the box at the end to allow Azure Services to access the resource. We will need this to allow access from our Azure Functions to the database.
+When all of the resources have been provisioned, in the Azure Portal navigate to your database server and update the network configurations to allow public network access from selected networks, add your IP address to the firewall rules as an allowed inbound traffic rule for local testing and select the box at the end to allow Azure Services to access the resource. We need this setting to allow access from our Azure Functions to our database.
 
 ![networking_config_db](https://user-images.githubusercontent.com/1051195/214764219-c2f837ca-ffc3-47b1-8fda-ea75bf184914.png)
 
-After that use the query editor to populate the database with the following commands:
+Next use the query editor to populate the database with the following commands:
 
 ```sql
 use azuremapsdb;
@@ -100,18 +102,18 @@ GO
 select * from Locations;
 
 ```
-The script above creates a table called _Locations_ and populates it with address parameters. After that, we populate the database with addresses representing Microsoft offices in Canada. Note that we are keeping the _latitude_ and _longitude_ parameters empty, on purpose.
+The script above creates a table called _Locations_ and populates it with address parameters. You might notice that our sample is populating the database with public addresses for Microsoft offices in Canada. Note that we are keeping the _latitude_ and _longitude_ parameters empty, on purpose.
 
-### Enriching the database and querying for addresses
+### Enrich the database and query for addresses
 
-We are going to be creating two functions: 
+To fill those parameters we will create two functions: 
 
 1. **_EnrichDatabase_** queries every address in the database that has an a\empty geolocation, makes a _Search API_ call to Azure Maps and populates the database with the latitude and longitude gathered from the response. We will use this first to enrich our address database.
 2. **_GetLocations_** simply queries for all enriched adddresses in the database. We will use this function in our front-end web application.
 
 #### Create the Function App
 
-We will be coding the functions in C# to take advantage of [Azure Functions SQL Extensions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-azure-sql), which are easier to achieve in C# than other coding languages, as of now. However, you can also take advantage of them in Java, JavaScript, Powershell and Python. Overall, they expedite the development time to build the connectivity between the Azure Function and the Azure SQL database by creating a simpler process to generate inputs, outputs and triggers.
+Our sample functions are coded in C# to take advantage of [Azure Functions SQL Extensions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-azure-sql), which are easier to use in C# than in other coding languages. Should you wish to use another language, you can use them in Java, JavaScript, Powershell and Python. Overall, they expedite the development time to build the connectivity between the Azure Function and the Azure SQL database by creating a simpler process to generate inputs, outputs and triggers.
 
 1. Install [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local)
 
@@ -119,9 +121,9 @@ We will be coding the functions in C# to take advantage of [Azure Functions SQL 
 
 3. Clone [this repository](TODO: add link to repository) containing the source code for both functions and the Azure Maps handler.
 
-#### Enable SQL bindings
+#### Build and configure the connections to the SQL Server
 
-Now, let's enable SQL bindings on the function app. 
+To create our connection we need to enable SQL bindings on the function app as follows: 
 
 1. Install the extension:
 
@@ -155,17 +157,17 @@ dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
     "SqlConnectionString": "{connection_string}"
    ```
 
-Follow [this guide](https://github.com/Azure/azure-functions-sql-extension/blob/main/docs/SetupGuide_Dotnet.md) for a deeper lesson on SQL bindings.
+Follow this [guide](https://github.com/Azure/azure-functions-sql-extension/blob/main/docs/SetupGuide_Dotnet.md) for a deeper lesson on SQL bindings.
 
-#### Azure Maps configuration
+#### Configure Azure Maps
 
-To enable our project to use the Azure Maps APIs, install the client library for .NET with NuGet:
+To enable this project to use the Azure Maps APIs, install the client library for .NET with NuGet:
 
 ```powershell
 dotnet add package Azure.Maps.Search --prerelease
 ```
 
-We also need the _Azure Maps primary key_ which can get from within the Azure Portal. Navigate to your Azure Maps resource and copy the _Primary key_ content from the **Authentication** tab.
+Then get the _Azure Maps primary key_ from the Azure Portal. Navigate to your Azure Maps resource and copy the _Primary key_ content from the **Authentication** tab.
 
 ![image](https://user-images.githubusercontent.com/1051195/221387224-bf76cb06-280a-43eb-a53b-a41a59d84d14.png)
 
@@ -175,13 +177,13 @@ Open your _local.settings.json_ file and add the following line at the end:
 "AzureMapsKey": "{Your key copied in the previous step}"
 ```
 
-#### Running the solution
+#### Run the solution
 
-In Visual Studio Code, open the terminal and press F5 to start debugging the backend application. YOu should see the two functions deployed locally.
+In Visual Studio Code, open the terminal and press F5 to start debugging the backend application. You should see the two functions deployed locally.
 
 ![image](https://user-images.githubusercontent.com/1051195/221387050-25b135b9-4b45-4cdf-8db1-f36f32a57cb8.png)
 
-First, run the _GetLocations_ function. You should see a list of addresses with no latitude and longitude:
+First, run the _GetLocations_ function. You should see a list of addresses with no latitude and longitude like this:
 
 ```json
 [
@@ -271,7 +273,7 @@ Finally, run _GetLocations_ for a second time. The new response will now contain
 ]
 ```
 
-### Explaining the code
+### Review the code
 
 Inside the _dotnet_ folder, you'll find the all the backend code that we will use to fetch the database locations and enrich the addresses. Let's breakdown file by file.
 
@@ -287,7 +289,7 @@ This is the function that will be used in our front-end web application to searc
 
 This function searches for addresses without geolocations, calls the SearchForAddress API from Azure Maps to colelct the latitude and longitude for all locations and store them in the database.
 
-#### Azure Maps
+#### About Azure Maps
 
 At this point, let's talk about how we are leveraging [Azure Maps](https://azuremaps.com/) to achieve the database enrichment process.
 
@@ -335,15 +337,15 @@ Let's look at the _AzureMapsHandler.cs_ file
 }
 ```
 
-When we instantiate the class, we create a credential using the Azure Maps key that we have stored as an environment variable. After that, we use this credential to create our _MapsSearchClient_. 
+When the class is instantiated, a credential was created using the Azure Maps key that was stored as an environment variable. After that, this credential was used to create the _MapsSearchClient_. 
 
 ```csharp
 AzureKeyCredential credential = new AzureKeyCredential(azureMapsKey);
 this.searchClient = new MapsSearchClient(credential);
 ```
-You can also use managed identities for a more secure solution to generate your credentials. Follow [this guide](https://techcommunity.microsoft.com/t5/azure-maps-blog/managed-identities-for-azure-maps/ba-p/3666312) if you choose this approach. 
+Managed identities can also be used as a more secure solution to generate your credentials. Follow this [guide](https://techcommunity.microsoft.com/t5/azure-maps-blog/managed-identities-for-azure-maps/ba-p/3666312) if you would like to know more about this approach. 
  
-Now, we create a StructuredAddress object from the location passed as a parameter. 
+Next a StructuredAddress object was created from the location and passed as a parameter. 
  
  ```csharp
 var address = new StructuredAddress
@@ -357,7 +359,7 @@ var address = new StructuredAddress
 };
 ```
 
-Finally, we call the _SearchStructureAddressAsync_ API passing the structured address as a parameter and update the location with the latitude and longitude from the response.
+Finally, the _SearchStructureAddressAsync_ API was called passing the structured address as a parameter and updated the location with the latitude and longitude from the response.
 
 ```csharp
 Response<SearchAddressResult> searchResult = await this.searchClient.SearchStructuredAddressAsync(address);
@@ -374,7 +376,7 @@ In general, Azure Maps has specific [terms](https://www.microsoft.com/licensing/
 
 However, caching and storing results is permitted where the purpose of caching is to reduce latency times of Customer’s application. Results may not be stored for longer than: the validity period indicated in returned headers; or 6 months, whichever is the shorter. Notwithstanding the foregoing, Customer may retain continual access to geocodes as long as Customer maintains an active Azure account.
 
-## Visualizing the results 
+## Visualize the results 
 
 Inside the folder _frontend_ open _MapView.html_. We need to replace two lines to get this web page working.
 
@@ -416,9 +418,17 @@ Inside the folder _frontend_ open _MapView.html_. We need to replace two lines t
 
    ![image](https://user-images.githubusercontent.com/1051195/221454289-1b5201fb-9225-433a-91b9-88e1c4d5191e.png)
 
-## Tearing down the environment
+## Tear down the environment when done
 
 1. Open the resource group you created for this project.
 2. Select **Delete resource group**.
 
     ![delete azure resource group](https://user-images.githubusercontent.com/1051195/221454826-1176eadc-69ac-4d80-aef8-3bdceff02a6c.png)
+    
+While this was a small sample, it should be a great staring point for any set of address data you may need to process. To find out more about Azure maps check out the following links:
+
+Azure Maps Marketing Site: [https://azure.microsoft.com/en-us/products/azure-maps](https://azure.microsoft.com/en-us/products/azure-maps)
+
+Azure Maps Blogs: [https://techcommunity.microsoft.com/t5/azure-maps-blog/bg-p/AzureMapsBlog](https://techcommunity.microsoft.com/t5/azure-maps-blog/bg-p/AzureMapsBlog)
+
+Azure Maps Samples: [https://samples.azuremaps.com/](https://samples.azuremaps.com/)
