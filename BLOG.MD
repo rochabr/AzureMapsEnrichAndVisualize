@@ -4,7 +4,7 @@
 
 Location information can be very simple or very detailed. For a person delivering a package to certain house, an address with street number, name, city, and state could be more than enough information for them to find the right place. For a vehicle tracking system where you have a map with moving dots representing trucks in real-time, these pieces of data may not be enough to provide clear information to a dispatcher. Adding the latitude and longitude of the vehicle to present its current and historical positions is more important. 
 
-A very common scenario is for a company to inherit or purchase a database of addresses to improve a certain process of their business. A retail chain may need to know where to put their next store to serve an undeserved population, a transportation company may need to find the best "green" route to create their truck schedule, or a sales compamy may need to define territories so that their sales people can maximize their coverage to achieve better results. Independent of the scenario, having a database of addresses may not be enough to achieve certain goals, because important details could be missing.
+A very common scenario is for a company to inherit or purchase a database of addresses to improve a certain process of their business. A retail chain may need to know where to put their next store to serve an undeserved population, a transportation company may need to find the best "green" route to create their truck schedule, or a sales company may need to define territories so that their salespeople can maximize their coverage to achieve better results. Independent of the scenario, having a database of addresses may not be enough to achieve certain goals, because important details could be missing.
 
 In this blog post, I will show you how to create a database of simple addresses, how to enrich it and how to visualize the enriched dataset using Azure Maps.
 
@@ -12,9 +12,9 @@ In this blog post, I will show you how to create a database of simple addresses,
 
 In the following architecture we have two separate actors securely connecting to Azure via a web application hosted in Azure App Services and an Azure Function, triggered on demand. 
 
-The Azure Function named _Enrich local data_ is responsible for searching for addresses without geolocation(latitude, longitude) in the Azure SQL Server database. For each addreess, a call is made to Azure Maps' Search API, passing the address information as a parameter and retrieving the geolocation to be stored in the database.
+The Azure Function named _Enrich local data_ is responsible for searching for addresses without geolocation (latitude, longitude) in the Azure SQL Server database. For each address, a call is made to Azure Maps' Search API, passing the address information as a parameter, and retrieving the geolocation to be stored in the database.
 
-There is also a user accessing a web applicaiton that collects the locations from Azure SQL Server using the Azure Function _Get locations_ and generates a visualization layer with the Azure Maps SDK to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
+There is also a user accessing a web application that collects the locations from Azure SQL Server using the Azure Function _Get locations_ and generates a visualization layer with the Azure Maps SDK to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
 
 <br>
 
@@ -36,7 +36,7 @@ To enrich the database of addresses, the application makes a request to the data
 
 <br>
 
-With the full list of addresses without geolocation, the application makes single calls with every single address to Azure Maps, calling the _Search API_. Azure Maps in response, provides the geolocation for that particular address. The response adds that inforamtion to the item and saves it locally. The _Search API_ also provides  extra properties in the response that are ignored by the application in this example.
+With the full list of addresses without geolocation, the application makes single calls with every single address to Azure Maps, calling the _Search API_. Azure Maps in response, provides the geolocation for that address. The response adds that information to the item and saves it locally. The _Search API_ also provides extra properties in the response that are ignored by the application in this example.
 
 <br>
 
@@ -70,7 +70,7 @@ The visualization layer contains a static web app, hosted in Azure, leveraging a
 
 <br>
 
-This is the end result:
+This is the result:
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/1051195/218615805-40729f76-2e3f-4bb0-a96f-2854b64651bf.png" alt="Web app with a map showing the addresses"/>
