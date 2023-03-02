@@ -34,75 +34,75 @@ Create a new Azure Maps account with the following steps:
 
 ### Create the database
 
-Follow these [instructions](https://learn.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?view=azuresql&tabs=azure-portal), to create an Azure SQL Database Server and a database, you can use any name you want to create your resources. In this tutorial we will call the database _azuremapsdb_.
+1. Follow these [instructions](https://learn.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?view=azuresql&tabs=azure-portal), to create an Azure SQL Database Server and a database, you can use any name you want to create your resources. In this tutorial we will call the database _azuremapsdb_.
 
-When all of the resources have been provisioned, in the Azure Portal navigate to your database server and update the network configurations to allow public network access from selected networks, add your IP address to the firewall rules as an allowed inbound traffic rule for local testing and select the box at the end to allow Azure Services to access the resource. We need this setting to allow access from our Azure Functions to our database.
+2. When all of the resources have been provisioned, in the Azure Portal navigate to your database server and update the network configurations to allow public network access from selected networks, add your IP address to the firewall rules as an allowed inbound traffic rule for local testing and select the box at the end to allow Azure Services to access the resource. We need this setting to allow access from our Azure Functions to our database.
 
-![networking_config_db](https://user-images.githubusercontent.com/1051195/214764219-c2f837ca-ffc3-47b1-8fda-ea75bf184914.png)
+   ![networking_config_db](https://user-images.githubusercontent.com/1051195/214764219-c2f837ca-ffc3-47b1-8fda-ea75bf184914.png)
 
-Next use the query editor to populate the database with the following commands:
+3. Next use the query editor to populate the database with the following commands:
 
-```sql
-use azuremapsdb;
+   ```sql
+   use azuremapsdb;
 
-GO
+   GO
 
-drop table Locations
+   drop table Locations
 
-GO 
-create table Locations(
- id int identity not null primary key,
- street_number varchar(100) not null,
- street_name varchar(100) not null,
- details  varchar(100),
- city varchar(100) not null,
- province varchar(2) not null,
- postal_code varchar(10) not null,
- country_code varchar(2) not null,
- latitude Decimal(8,6),
- longitude Decimal(9,6))
+   GO 
+   create table Locations(
+    id int identity not null primary key,
+    street_number varchar(100) not null,
+    street_name varchar(100) not null,
+    details  varchar(100),
+    city varchar(100) not null,
+    province varchar(2) not null,
+    postal_code varchar(10) not null,
+    country_code varchar(2) not null,
+    latitude Decimal(8,6),
+    longitude Decimal(9,6))
 
-GO 
+   GO 
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('81', 'Bay St', 'Suite 4400','Toronto', 'ON', 'M5J 0E7', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('81', 'Bay St', 'Suite 4400','Toronto', 'ON', 'M5J 0E7', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('6795', 'Marconi Street', 'Suite 401', 'Montreal', 'QC', 'H2S 3J9', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('6795', 'Marconi Street', 'Suite 401', 'Montreal', 'QC', 'H2S 3J9', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('2000', 'Avenue McGill College', 'Suite 1400', 'Montreal', 'QC', 'H3A 3H3', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('2000', 'Avenue McGill College', 'Suite 1400', 'Montreal', 'QC', 'H3A 3H3', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('100', 'Queen Street', 'Suite 500', 'Ottawa', 'ON', 'K1P 1J9', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('100', 'Queen Street', 'Suite 500', 'Ottawa', 'ON', 'K1P 1J9', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('360', 'Main Street', 'Suite 1150', 'Winnipeg', 'MB', 'R3C 3Z3', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('360', 'Main Street', 'Suite 1150', 'Winnipeg', 'MB', 'R3C 3Z3', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('110', '9th Avenue SW', '7th Floor Suite 710', 'Calgary', 'AB', 'T2P 0T1', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('110', '9th Avenue SW', '7th Floor Suite 710', 'Calgary', 'AB', 'T2P 0T1', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('10155', '102 Street', 'Suite 2100 Commerce Place', 'Edmonton', 'AB', 'T5J 4G8', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('10155', '102 Street', 'Suite 2100 Commerce Place', 'Edmonton', 'AB', 'T5J 4G8', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('155', 'Water Street', '7th Floor', 'Vancouver', 'BC', 'V6B 5C6', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('155', 'Water Street', '7th Floor', 'Vancouver', 'BC', 'V6B 5C6', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('725', 'Granville Street', 'Suite 700', 'Vancouver', 'BC', 'V7Y 1G5', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('725', 'Granville Street', 'Suite 700', 'Vancouver', 'BC', 'V7Y 1G5', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('858', 'Beatty Street', '6th Floor', 'Vancouver', 'BC', 'V6B 1C1', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('858', 'Beatty Street', '6th Floor', 'Vancouver', 'BC', 'V6B 1C1', 'CA');
 
-insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
-values ('375', 'Water Street', 'Suite 710', 'Vancouver', 'BC', 'V6B 5C6', 'CA');
+   insert into Locations(street_number, street_name, details, city, province, postal_code, country_code)
+   values ('375', 'Water Street', 'Suite 710', 'Vancouver', 'BC', 'V6B 5C6', 'CA');
 
-GO
+   GO
 
-select * from Locations;
+   select * from Locations;
 
-```
-The script above creates a table called _Locations_ and populates it with address parameters. You might notice that our sample is populating the database with public addresses for Microsoft offices in Canada. Note that we are keeping the _latitude_ and _longitude_ parameters empty, on purpose.
+  ```
+  The script above creates a table called _Locations_ and populates it with address parameters. You might notice that our sample is populating the database with public addresses for Microsoft offices in Canada. Note that we are keeping the _latitude_ and _longitude_ parameters empty, on purpose.
 
 ### Enrich the database and query for addresses
 
@@ -111,13 +111,13 @@ To fill those parameters we will create two functions:
 1. **_EnrichDatabase_** queries every address in the database that has an a\empty geolocation, makes a _Search API_ call to Azure Maps and populates the database with the latitude and longitude gathered from the response. We will use this first to enrich our address database.
 2. **_GetLocations_** simply queries for all enriched adddresses in the database. We will use this function in our front-end web application.
 
-#### Create the Function App
+#### Create the Function Apps
 
 Our sample functions are coded in C# to take advantage of [Azure Functions SQL Extensions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-azure-sql), which are easier to use in C# than in other coding languages. Should you wish to use another language, you can use them in Java, JavaScript, Powershell and Python. Overall, they expedite the development time to build the connectivity between the Azure Function and the Azure SQL database by creating a simpler process to generate inputs, outputs and triggers.
 
 1. Install [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local)
 
-2. Create two function apps for .NET by following [this guide](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-csharp?tabs=in-process) to create your functions on Visual Studio code and publish them to your Azure Subscription. Create one called _EnrichDatabase_ and another called _GetLocations_. 
+2. Using Visual Studio Code, create two function apps for .NET by following [this guide](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-csharp?tabs=in-process). We can test this locally but feel free to publish them to your Azure Subscription. Create one called _EnrichDatabase_ and another called _GetLocations_. 
 
 3. Clone [this repository](TODO: add link to repository) containing the source code for both functions and the Azure Maps handler.
 
@@ -127,9 +127,9 @@ To create our connection we need to enable SQL bindings on the function app as f
 
 1. Install the extension:
 
-```powershell
-dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
-```
+   ```powershell
+   dotnet add package Microsoft.Azure.WebJobs.Extensions.Sql --prerelease
+   ```
 
 2. Get the SQL connection string from your database.
 
@@ -161,27 +161,26 @@ Follow this [guide](https://github.com/Azure/azure-functions-sql-extension/blob/
 
 #### Configure Azure Maps
 
-To enable this project to use the Azure Maps APIs, install the client library for .NET with NuGet:
+1. To enable this project to use the Azure Maps Search API, install the client library for .NET with NuGet:
 
-```powershell
-dotnet add package Azure.Maps.Search --prerelease
-```
+   ```powershell
+   dotnet add package Azure.Maps.Search --prerelease
+   ```
+2. Then get the _Azure Maps primary key_ from the Azure Portal. Navigate to your Azure Maps resource and copy the _Primary key_ content from the **Authentication** tab.
 
-Then get the _Azure Maps primary key_ from the Azure Portal. Navigate to your Azure Maps resource and copy the _Primary key_ content from the **Authentication** tab.
+   ![image](https://user-images.githubusercontent.com/1051195/221387224-bf76cb06-280a-43eb-a53b-a41a59d84d14.png)
 
-![image](https://user-images.githubusercontent.com/1051195/221387224-bf76cb06-280a-43eb-a53b-a41a59d84d14.png)
+3. Open your _local.settings.json_ file and add the following line at the end:
 
-Open your _local.settings.json_ file and add the following line at the end:
-
-```powershell
-"AzureMapsKey": "{Your key copied in the previous step}"
-```
+   ```powershell
+   "AzureMapsKey": "{Your key copied in the previous step}"
+   ```
 
 #### Run the solution
 
 In Visual Studio Code, open the terminal and press F5 to start debugging the backend application. You should see the two functions deployed locally.
 
-![image](https://user-images.githubusercontent.com/1051195/221387050-25b135b9-4b45-4cdf-8db1-f36f32a57cb8.png)
+   ![image](https://user-images.githubusercontent.com/1051195/221387050-25b135b9-4b45-4cdf-8db1-f36f32a57cb8.png)
 
 First, run the _GetLocations_ function. You should see a list of addresses with no latitude and longitude like this:
 
@@ -279,15 +278,15 @@ Inside the _dotnet_ folder, you'll find the all the backend code that we will us
 
 1. Locations.cs
 
-This model represents the Location table in our database. Note that the _latitude_ and _longitude_ values are nullable, because when we query for the addresses for the first time, they won't exist.
+   This model represents the Location table in our database. Note that the _latitude_ and _longitude_ values are nullable, because when we query for the addresses for the first time, they won't exist.
 
 2. GetLocations.cs
 
-This is the function that will be used in our front-end web application to search for the address geolocation and populate the map.
+   This is the function that will be used in our front-end web application to search for the address geolocation and populate the map.
 
 3. EnrichDatabase.cs
 
-This function searches for addresses without geolocations, calls the SearchForAddress API from Azure Maps to colelct the latitude and longitude for all locations and store them in the database.
+   This function searches for addresses without geolocations, calls the SearchForAddress API from Azure Maps to collect the latitude and longitude for all locations and store them in the database.
 
 #### About Azure Maps
 
@@ -345,7 +344,7 @@ this.searchClient = new MapsSearchClient(credential);
 ```
 Managed identities can also be used as a more secure solution to generate your credentials. Follow this [guide](https://techcommunity.microsoft.com/t5/azure-maps-blog/managed-identities-for-azure-maps/ba-p/3666312) if you would like to know more about this approach. 
  
-Next a StructuredAddress object was created from the location and passed as a parameter. 
+Next a _StructuredAddress_ object was created from the location and passed as a parameter. 
  
  ```csharp
 var address = new StructuredAddress
@@ -386,7 +385,7 @@ Inside the folder _frontend_ open _MapView.html_. We need to replace two lines t
    const getLocationURL = '<Your API URL>';
    ```
 
-2. In line 46, inside the map initialization function _GetMap()_, add you Azure Maps subscription key to authenticate to your resource:
+2. In line 46, inside the map initialization function _GetMap()_, replace _<Your subscription key>_ with your Azure Maps subscription key to authorize access to your resource:
 
    ```javascript
    //Initialize a map instance.
