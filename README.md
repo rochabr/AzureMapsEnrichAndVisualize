@@ -385,7 +385,7 @@ Inside the folder _frontend_ open _MapView.html_. We need to replace two lines t
    const getLocationURL = '<Your API URL>';
    ```
 
-2. In line 46, inside the map initialization function _GetMap()_, replace _<Your subscription key>_ with your Azure Maps subscription key to authorize access to your resource:
+2. In line 36, inside the map initialization function _GetMap()_, replace _<Your subscription key>_ with your Azure Maps subscription key to authorize access to your resource:
 
    ```javascript
    //Initialize a map instance.
@@ -396,17 +396,6 @@ Inside the folder _frontend_ open _MapView.html_. We need to replace two lines t
 
        //Add authentication details for connecting to Azure Maps.
        authOptions: {
-           //Use Azure Active Directory authentication.
-           // authType: 'anonymous',
-           // clientId: 'e6b6ab59-eb5d-4d25-aa57-581135b927f0', //Your Azure Maps client id for accessing your Azure Maps account.
-           // getToken: function (resolve, reject, map) {
-           //     //URL to your authentication service that retrieves an Azure Active Directory Token.
-           //     var tokenServiceUrl = "https://samples.azuremaps.com/api/GetAzureMapsToken";
-
-           //     fetch(tokenServiceUrl).then(r => r.text()).then(token => resolve(token));
-           // }
-
-           //Alternatively, use an Azure Maps key. Get an Azure Maps key at https://azure.com/maps. NOTE: The primary key should be used as the key.
            authType: 'subscriptionKey',
            subscriptionKey: '<Your subscription key>'
        }
