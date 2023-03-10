@@ -6,15 +6,15 @@ Location information can be very simple or very detailed. For a person deliverin
 
 A very common scenario where the location data in place may not be enough to perform a certain task is when a company inherits or purchases a database of addresses to improve a  process of their business. A retail chain may need to know where to put their next store to serve an undeserved population, a transportation company may need to find the best "green" route to create their truck schedule, or a sales company may need to define territories so that their salespeople can maximize their coverage to achieve better results. Independent of the scenario, having a database of addresses may not be enough to achieve certain goals, because important details could be missing.
 
-In this blog post, I will show you how to create a database of simple addresses, how to enrich it and how to visualize the enriched dataset using Azure Maps.
+In this blog post, I will show you how to create a database of simple addresses, how to enrich it and how to visualize the enriched dataset using [Azure Maps](https://azure.microsoft.com/en-us/products/azure-maps).
 
 ## Architecture
 
 In the following architecture we have two separate actors securely connecting to Azure via a web application hosted in Azure App Services and an Azure Function, triggered on demand. 
 
-The Azure Function named _Enrich addresses_ is responsible for searching for addresses without geolocation (latitude, longitude) in the Azure SQL Server database. For each address, a call is made to Azure Maps' Search API, passing the address information as a parameter, and retrieving the geolocation to be stored in the database.
+The Azure Function named _Enrich addresses_ is responsible for searching for addresses without geolocation (latitude, longitude) in the Azure SQL Server database. For each address, a call is made to [Azure Maps' Search API](https://learn.microsoft.com/en-us/rest/api/maps/search), passing the address information as a parameter, and retrieving the geolocation to be stored in the database.
 
-There is also a user accessing a web application that collects the locations from Azure SQL Server using the Azure Function _Get locations_ and generates a visualization layer with the Azure Maps SDK to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
+There is also a user accessing a web application that collects the locations from Azure SQL Server using the Azure Function _Get addresses_ and generates a visualization layer with the [Azure Maps SDK](https://learn.microsoft.com/en-us/azure/azure-maps/) to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
 
 <br>
 
