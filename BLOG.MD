@@ -10,9 +10,9 @@ In this blog post, I will show you how to create a database of simple addresses,
 
 ## Architecture
 
-In the following architecture we have two separate actors securely connecting to Azure via a web application hosted in Azure App Services and an Azure Function, triggered on demand. 
+In the following architecture we have two separate actors securely connecting to Azure via a web application hosted in Azure and an Azure Function, triggered on demand. 
 
-The Azure Function named _Enrich addresses_ is responsible for searching for addresses without geolocation (latitude, longitude) in the Azure SQL Server database. For each address, a call is made to [Azure Maps' Search API](https://learn.microsoft.com/en-us/rest/api/maps/search), passing the address information as a parameter, and retrieving the geolocation to be stored in the database.
+The Azure Function named _Enrich addresses_ is responsible for searching for addresses without a geolocation (latitude, longitude) in the Azure SQL Server database. For each address, a call is made to the [Azure Maps Search API](https://learn.microsoft.com/en-us/rest/api/maps/search), passing the address information as a parameter, and retrieving the geolocation to be stored in the database.
 
 There is also a user accessing a web application that collects the locations from Azure SQL Server using the Azure Function _Get addresses_ and generates a visualization layer with the [Azure Maps SDK](https://learn.microsoft.com/en-us/azure/azure-maps/) to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
 
@@ -36,7 +36,7 @@ To enrich the database of addresses, the application makes a request to the data
 
 <br>
 
-With the full list of addresses without geolocation, the application makes single calls with every single address to Azure Maps, calling the _Search API_. Azure Maps in response, provides the geolocation for that address. The response adds that information to the item and saves it locally. The _Search API_ also provides extra properties in the response that are ignored by the application in this example.
+With the full list of addresses without geolocations, the application makes single calls with every single address to Azure Maps, calling the _Search API_. Azure Maps in response, provides the geolocation for that address. The response adds that information to the item and saves it locally. The _Search API_ also provides extra properties in the response that are ignored by the application in this example.
 
 <br>
 
@@ -46,7 +46,7 @@ With the full list of addresses without geolocation, the application makes singl
 
 <br>
 
-Lastly, the application saves the updated addresses with their corresponding geolocations to the database. 
+Lastly, the application updates the addresses with their corresponding geolocations in the database. 
 
 <br>
 
