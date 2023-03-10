@@ -12,7 +12,7 @@ In this blog post, I will show you how to create a database of simple addresses,
 
 In the following architecture we have two separate actors securely connecting to Azure via a web application hosted in Azure App Services and an Azure Function, triggered on demand. 
 
-The Azure Function named _Enrich local data_ is responsible for searching for addresses without geolocation (latitude, longitude) in the Azure SQL Server database. For each address, a call is made to Azure Maps' Search API, passing the address information as a parameter, and retrieving the geolocation to be stored in the database.
+The Azure Function named _Enrich addresses_ is responsible for searching for addresses without geolocation (latitude, longitude) in the Azure SQL Server database. For each address, a call is made to Azure Maps' Search API, passing the address information as a parameter, and retrieving the geolocation to be stored in the database.
 
 There is also a user accessing a web application that collects the locations from Azure SQL Server using the Azure Function _Get locations_ and generates a visualization layer with the Azure Maps SDK to present the addresses as points in a map. All traffic is handled via https and is encrypted with TLS.
 
