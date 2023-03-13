@@ -413,10 +413,4 @@ Inside the folder _frontend_ open _MapView.html_. We need to replace two lines t
 
     ![delete azure resource group](https://user-images.githubusercontent.com/1051195/221454826-1176eadc-69ac-4d80-aef8-3bdceff02a6c.png)
     
-While this was a small sample, it should be a great staring point for any set of address data you may need to process. To find out more about Azure maps check out the following links:
-
-Azure Maps Marketing Site: [https://azure.microsoft.com/en-us/products/azure-maps](https://azure.microsoft.com/en-us/products/azure-maps)
-
-Azure Maps Blogs: [https://techcommunity.microsoft.com/t5/azure-maps-blog/bg-p/AzureMapsBlog](https://techcommunity.microsoft.com/t5/azure-maps-blog/bg-p/AzureMapsBlog)
-
-Azure Maps Samples: [https://samples.azuremaps.com/](https://samples.azuremaps.com/)
+To find out more about Azure maps check out the [Azure Maps marketing site](https://azure.microsoft.com/en-us/products/azure-maps), the [Azure Maps blog](https://techcommunity.microsoft.com/t5/azure-maps-blog/bg-p/AzureMapsBlog) and the [Azure Maps Samples site](https://samples.azuremaps.com/).
