@@ -100,8 +100,8 @@ Create a new Azure Maps account with the following steps:
    GO
 
    select * from Locations;
-
-  ```
+   ```
+  
   The script above creates a table called _Locations_ and populates it with address parameters. You might notice that our sample is populating the database with public addresses for Microsoft offices in Canada. Note that we are keeping the _latitude_ and _longitude_ parameters empty, on purpose.
 
 ### Enrich the database and query for addresses
