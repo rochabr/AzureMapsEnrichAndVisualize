@@ -2,7 +2,7 @@
 
 There are many situations where you have a collection of addresses but they are not really useful unless you can know exactly what and where they represent. Enriching those addresses with the ability to be understood geographically opens up infinite use cases to leverage that data for proximity calculation and visualization experiences that can not be accomplished with addresses alone. The following steps show how you might easily prepare a set of address data for such scenarios.
 
-### Pre-requisites
+### Prerequisites
 
 To build this solution you will need:
 
